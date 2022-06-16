@@ -22,7 +22,7 @@ namespace ABCHealthcare.Controllers
         [MyAuthorize(Roles = "User,Admin")]
         public IQueryable<Order> GetOrders()
         {
-            return db.Orders;
+            return db.Orders.Include(o => o.Medicine).Include(o => o.User);
         }
 
         // GET: api/Orders/5
@@ -31,7 +31,7 @@ namespace ABCHealthcare.Controllers
         [ResponseType(typeof(Order))]
         public async Task<IHttpActionResult> GetOrder(int id)
         {
-            Order order = await db.Orders.FindAsync(id);
+            Order order = await db.Orders.Include(o => o.Medicine).Include(o => o.User).SingleOrDefaultAsync(i => i.Id == id);
             if (order == null)
             {
                 return NotFound();

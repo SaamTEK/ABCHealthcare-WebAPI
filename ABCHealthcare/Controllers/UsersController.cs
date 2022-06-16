@@ -47,10 +47,12 @@ namespace ABCHealthcare.Controllers
             var res = await db.Users.AnyAsync(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase) && user.Password == password);
             if(res)
             {
+                User user = await db.Users.Where(x => x.UserName.Equals(username, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
                 var plainText = username + ":" + password;
                 var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
                 string token = "BASIC " + Convert.ToBase64String(plainTextBytes);
-                return Ok(token);
+
+                return Json(new { token, user }) ;
             } else
             {
                 return BadRequest();

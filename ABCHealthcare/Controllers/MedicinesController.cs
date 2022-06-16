@@ -24,14 +24,14 @@ namespace ABCHealthcare.Controllers
         // GET: api/Medicines
         public IQueryable<Medicine> GetMedicines()
         {
-            return db.Medicines;
+            return db.Medicines.Include(m => m.Category);
         }
 
         // GET: api/Medicines/5
         [ResponseType(typeof(Medicine))]
         public async Task<IHttpActionResult> GetMedicine(int id)
         {
-            Medicine medicine = await db.Medicines.FindAsync(id);
+            Medicine medicine = await db.Medicines.Include(m => m.Category).SingleOrDefaultAsync(i => i.Id == id);
             if (medicine == null)
             {
                 return NotFound();
@@ -121,17 +121,32 @@ namespace ABCHealthcare.Controllers
 
             if (file != null && file.ContentLength > 0)
             {
-                var fileName = Path.GetFileName(file.FileName);
+
+                string FileName = Path.GetFileNameWithoutExtension(file.FileName);
+                string FileExtension = Path.GetExtension(file.FileName);
+                FileName = DateTime.Now.ToString("yyyyMMdd") + "-" + FileName.Trim() + FileExtension;
+                //var fileName = Path.GetFileName(file.FileName);
 
                 var path = Path.Combine(
                     HttpContext.Current.Server.MapPath("~/Uploads"),
-                    fileName
+                    FileName
                 );
 
                 file.SaveAs(path);
-            }
 
-            return file != null ? "/Uploads/" + file.FileName : null;
+                string filePath = null;
+                filePath = "/Uploads/" + FileName;
+
+                if (filePath != null)
+                {
+                    return filePath;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            return null;
         }
 
         protected override void Dispose(bool disposing)
